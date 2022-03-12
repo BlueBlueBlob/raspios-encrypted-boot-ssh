@@ -1,6 +1,6 @@
 # Raspberry Pi Encrypted Boot with SSH
 
-> Tested on Raspberry Pi [3B](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) & [4B](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) with [Ubuntu Server 21.04](https://ubuntu.com/download/raspberry-pi)
+> Tested on Raspberry Pi [4B](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) with [Raspberry Pi OS Lite x64](https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-64-bit)
 
 ## Introduction
 
@@ -9,6 +9,8 @@ This guide will show you how to encrypt your Raspberry Pi's root partition and s
 While the steps are written for the Raspberry Pi, they should be easily transferrable to other SBCs and computers as a whole.
 
 This guide operates directly on an image file and therefore does not require an SD card for the setup. The resulting image can be flashed to an SD card as usual.
+
+This fork is for Raspberry Pi OS only
 
 ## Table of Content
 
@@ -31,32 +33,29 @@ This guide operates directly on an image file and therefore does not require an 
 
 ## Requirements
 
-- A Raspberry Pi Linux image (e.g. [Ubuntu Server 21.04](https://ubuntu.com/download/raspberry-pi))
-- A computer (host) running Linux (e.g. [Xubuntu 21.04](https://xubuntu.org/download))
-
-  > :warning: **NOTE:** Your host's Linux should be as similar as possible to the Raspberry Pi's Linux. If you are preparing Ubuntu 21.04 for the Raspberry Pi, use the same version on the host, otherwise you may encounter issues inside the chroot.
+- Latest image of Raspberry Pi OS x64
+- A computer (host) running Raspberry Pi OS x64 (not sure)
 
 ## On the host
 
 Install dependencies:
 
-> You can skip `qemu-user-static` if your host Linux's architecture matches that of the Raspberry Pi's Linux image.
-
 ```sh
 apt update
-apt install -y kpartx cryptsetup-bin qemu-user-static
+apt install -y kpartx cryptsetup-bin
 ```
 
 Create two copies of the Raspberry Pi's Linux image - one to read from (base), and one to write to (target):
 
-- ubuntu-base.img
-- ubuntu-target.img
+- raspios-base.img
+- raspios-target.img
 
 Map both images as devices, ensuring the base is readonly:
 
 ```sh
-kpartx -ar "$PWD/ubuntu-base.img"
-kpartx -a "$PWD/ubuntu-target.img"
+sudo -s
+kpartx -ar raspios-base.img
+kpartx -a raspios-target.img
 ```
 
 If your system automatically mounted any partitions, unmount them:
@@ -69,10 +68,10 @@ Run [lsblk](https://linux.die.net/man/8/lsblk) and verify the process was succes
 
 ```sh
 NAME      MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT # COMMENT
-loop0       7:0    0  3.3G  0 loop            # ubuntu-base.img
+loop0       7:0    0  3.3G  0 loop            # raspios-base.img
 ├─loop0p1 253:0    0  256M  0 part            # ├─ boot
 └─loop0p2 253:1    0    3G  0 part            # └─ root
-loop1       7:1    0  3.3G  1 loop            # ubuntu-target.img
+loop1       7:1    0  3.3G  1 loop            # raspios-target.img
 ├─loop1p1 253:2    0  256M  1 part            # ├─ boot
 └─loop1p2 253:3    0    3G  1 part            # └─ root
 ```
@@ -246,9 +245,22 @@ mkinitramfs -o /boot/initrd.img "5.4.0-1008-raspi"
 If you had an initramdisk when you checked in the beginning of this section, then your system is already configured to use an initramfs - no changes are necessary. Otherwise, add an entry to your boot config:
 
 ```sh
-echo initramfs initrd.img >> /boot/config.txt
+echo initramfs initrd.img followkernel >> /boot/config.txt
 ```
 
+Add an automatic rebuild for initrd.img
+```sh
+echo '#!/bin/sh -e
+# Rebuild initrd.img after kernel upgrade to include new kernel’s modules.
+#
+# Exit if rebuild cannot be performed or not needed.
+[ -x /usr/sbin/mkinitramfs ] || exit 0
+version="$1"
+
+[ -f /boot/initrd.img ] && lsinitramfs /boot/initrd.img | grep -q "/$version$" && exit 0 # Already in initramfs.
+# Rebuild.
+mkinitramfs -o /boot/initrd.img "$version"'  > /etc/kernel/postinst.d/rebuild
+chmod +x /etc/kernel/postinst.d/rebuild
 ### Cleanup
 
 Revert any changes if you have made them before:
@@ -279,11 +291,11 @@ cryptsetup close crypted
 umount /mnt/original
 rm -d /mnt/chroot
 rm -d /mnt/original
-kpartx -d "$PWD/ubuntu-base.img"
-kpartx -d "$PWD/ubuntu-target.img"
+kpartx -d "$PWD/raspios-base.img"
+kpartx -d "$PWD/raspios-target.img"
 ```
 
-You are now ready to flash `ubuntu-target.img` to an SD card.
+You are now ready to flash `raspios-target.img` to an SD card.
 
 ## On the Raspberry Pi
 
