@@ -302,12 +302,7 @@ You are now ready to flash `raspios-target.img` to an SD card.
 Boot the Raspberry Pi with the new SD card. It will obtain an IP address from the DHCP server and start listening for SSH connections. To decrypt the root partition and continue boot, from any shell, simply run `cryptroot-unlock`.
 
 Once booted into the decrypted system, you will notice that the root partition is still sized at ~3GB, no matter how much space you have on the SD card. To fix this, delete and recreate the partition, this time using all available space, then follow up with cryptsetup and ext4 resize:
-
-```sh
-echo -e "d\n2\nn\np\n2\n\n\nw" | fdisk /dev/mmcblk0
-cryptsetup resize crypted
-resize2fs /dev/mapper/crypted
-```
+[How to resize encrypted partion](https://blog.tinned-software.net/increase-the-size-of-a-luks-encrypted-partition/)
 
 Finally, reboot the system for good measure:
 
@@ -338,3 +333,6 @@ Host box-initramfs
 - https://www.raspberrypi.org/forums/viewtopic.php?t=252980
 - https://thej6s.com/articles/2019-03-05__decrypting-boot-drives-remotely/
 - https://www.pbworks.net/ubuntu-guide-dropbear-ssh-server-to-unlock-luks-encrypted-pc/
+- https://blog.tinned-software.net/increase-the-size-of-a-luks-encrypted-partition/
+- https://github.com/raspberrypi/firmware/issues/608#issuecomment-471655157
+- https://github.com/ViRb3/pi-encrypted-boot-ssh
