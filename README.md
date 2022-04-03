@@ -261,11 +261,11 @@ version="$1"
 # Rebuild.
 mkinitramfs -o /boot/initrd.img "$version"'  > /etc/kernel/postinst.d/rebuild
 chmod +x /etc/kernel/postinst.d/rebuild
-```sh
+```
 Revert any changes if you have made them before:
 ```sh
 mv /etc/resolv.conf.bak /etc/resolv.conf
-```sh
+```
 
 Sync and exit the chroot:
 
