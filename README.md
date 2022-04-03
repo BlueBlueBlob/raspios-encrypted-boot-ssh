@@ -256,13 +256,14 @@ echo '#!/bin/sh -e
 # Exit if rebuild cannot be performed or not needed.
 [ -x /usr/sbin/mkinitramfs ] || exit 0
 version="$1"
-
 [ -f /boot/initrd.img ] && lsinitramfs /boot/initrd.img | grep -q "/$version$" && exit 0 # Already in initramfs.
 # Rebuild.
 mkinitramfs -o /boot/initrd.img "$version"'  > /etc/kernel/postinst.d/rebuild
 chmod +x /etc/kernel/postinst.d/rebuild
 ```
+
 Revert any changes if you have made them before:
+
 ```sh
 mv /etc/resolv.conf.bak /etc/resolv.conf
 ```
