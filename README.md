@@ -335,3 +335,8 @@ Host box-initramfs
 - https://blog.tinned-software.net/increase-the-size-of-a-luks-encrypted-partition/
 - https://github.com/raspberrypi/firmware/issues/608#issuecomment-471655157
 - https://github.com/ViRb3/pi-encrypted-boot-ssh
+
+TODO : 
+1. Add how to extend base image file size
+2. Ssh uncrypted config and other base stuff during chroot
+3. Change dropbear ssh hostname
