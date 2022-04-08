@@ -226,6 +226,14 @@ echo "/REDACTED/" > /etc/dropbear-initramfs/authorized_keys
 chmod 0600 /etc/dropbear-initramfs/authorized_keys
 ```
 
+Change dropear's hostname :
+Edit `/etc/initramfs-tools/initramfs.conf` to comment DEVICE and IP
+
+```sh
+#DEVICE
+IP=::::rpi-crypted::dhcp
+```
+
 ### Build initramfs
 
 Note whether you already have an initramdisk - it should be under `/boot/initrd.img`. This will decide whether you need to update your boot config later on.
@@ -339,4 +347,3 @@ Host box-initramfs
 TODO : 
 1. Add how to extend base image file size
 2. Ssh uncrypted config and other base stuff during chroot
-3. Change dropbear ssh hostname
