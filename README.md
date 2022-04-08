@@ -44,7 +44,18 @@ Install dependencies:
 apt update
 apt install -y kpartx cryptsetup-bin
 ```
-
+Optional : extend base image free space. Useful If you want to update/install other app than requirements during CHROOT part :
+```sh
+dd if=/dev/zero bs=1M count=200 >> raspios-base.img
+```
+After adding 200MB (count=200) you need add free space to / partition :
+```sh
+sudo parted raspios-base.img
+#check Disk space and note it
+p
+resizepart 2 numberyounetedit
+q
+```
 Create two copies of the Raspberry Pi's Linux image - one to read from (base), and one to write to (target):
 
 - raspios-base.img
@@ -229,7 +240,7 @@ chmod 0600 /etc/dropbear-initramfs/authorized_keys
 Change dropear's hostname :
 Edit `/etc/initramfs-tools/initramfs.conf` to comment DEVICE and add IP
 
-```sh
+```config
 #DEVICE
 IP=::::rpi-crypted::dhcp
 ```
