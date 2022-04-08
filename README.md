@@ -227,7 +227,7 @@ chmod 0600 /etc/dropbear-initramfs/authorized_keys
 ```
 
 Change dropear's hostname :
-Edit `/etc/initramfs-tools/initramfs.conf` to comment DEVICE and IP
+Edit `/etc/initramfs-tools/initramfs.conf` to comment DEVICE and add IP
 
 ```sh
 #DEVICE
